@@ -20,6 +20,63 @@ class Rhino :
             self.pos = ["all"]
             
         self.filters = filters
+        
+        self.word_classes = {
+            "noun" : """
+        - 명사 계열
+        일반명사(NounNounGeneral, NNG) 
+        고유명사(NounNounPerson, NNP) 
+        의존명사(NounNounBojo, NNB) 
+        대명사(NounPerson, NP) 
+        수사(NumbeR, NR) 
+        동사(Verb Verb, VV) 
+        형용사(Verb Adjective, VA) 
+        보조용언(Verb eXtended, VX) 
+        긍정지정사(Verb Complement Positive, VCP)
+        부정지정사(Verb Complement Negative, VCN)
+        관형사(Modifier Modifier, MM) 
+        일반부사(Modifier Adjective General, MAG)
+        접속부사(Modifier Adjective Jupsok, MAJ)
+        감탄사(InterjeCtion, IC)
+            """,
+            "josa" : """
+        - 조사 계열 
+        주격조사(Josa Kyok Subjective, JKS) 
+        보격조사(Josa Kyok Complement, JKC) 
+        관형격조사(Josa Kyok Genitive, JKG) 
+        목적격조사(Josa Kyok Objective, JKO) 
+        부사격조사(Josa Kyok Boosa, JKB) 
+        호격조사(Josa Kyok Vocative, JKV) 
+        인용격조사(Josa Kyok Quotation, JKQ) 
+        보조사(Josa auXiliary, JX) :
+        접속조사(Josa Connection, JC)
+            """,
+            "eomi" : """
+        - 어미 계열 
+        선어말어미(Eomi Preposition, EP)
+        종결어미(Eomi Final, EF) :
+        연결어미(Eomi Connection, EC) 
+        명사형전성어미(Eomi Transitive Noun, ETN) 
+        관형형전성어미(Eomi Transitive Modifier, ETM) 
+        체언접두사(XPN) 
+        명사파생접미사(eXtended Suffix Noun, XSN) 
+        동사파생접미사(eXtended Suffix Verb, XSV)
+        형용사파생접미사(eXtended Suffix Adjective, XSA)
+        어근(eXtended Root, XR)
+            """,
+            "sign" : """
+        - Sign 계열 
+        마침표, 물음표, 느낌표(Sign Final, SF) 
+        따옴표, 괄호표, 줄표(SS) 
+        쉼표, 가운뎃점, 콜론, 빗금(SP) 
+        줄임표(Sign Ending, SE) 
+        붙임표(물결, 숨김, 빠짐)(SO) 
+        외국어(Sign Language, SL) 
+        한자(Sign Hanja, SH) 
+        숫자(Sign Number, SN) 
+        기타기호(논리수학기호, 화폐기호)(SW)
+            """
+        }
 
     def onlyMorph_list(self, input, 
                        pos = [], filters = [], 
@@ -106,63 +163,17 @@ class Rhino :
         """
         return rhinoMorph.wholeResult_text(self.rn, input, xrVv)
 
-    def print_word_classes(self) -> None :
+    def print_word_classes(self, type = ["noun", "josa", "eomi", "sign"]) -> None :  
         """
     def print_word_classes(self) -> None :
-        사용 가능한 품사 종류를 출력한다
+        사용 가능한 품사 종류를 출력한다,
+        1. type : "noun", "josa", "eomi", "sign"이 요소로 쓰인 리스트
+                  기본값은 ["noun", "josa", "eomi", "sign"]
         """
         
-        word_classes_str = """
-        - 명사 계열
-        일반명사(NounNounGeneral, NNG) 
-        고유명사(NounNounPerson, NNP) 
-        의존명사(NounNounBojo, NNB) 
-        대명사(NounPerson, NP) 
-        수사(NumbeR, NR) 
-        동사(Verb Verb, VV) 
-        형용사(Verb Adjective, VA) 
-        보조용언(Verb eXtended, VX) 
-        긍정지정사(Verb Complement Positive, VCP)
-        부정지정사(Verb Complement Negative, VCN)
-        관형사(Modifier Modifier, MM) 
-        일반부사(Modifier Adjective General, MAG)
-        접속부사(Modifier Adjective Jupsok, MAJ)
-        감탄사(InterjeCtion, IC)
-
-        - 조사 계열 
-        주격조사(Josa Kyok Subjective, JKS) 
-        보격조사(Josa Kyok Complement, JKC) 
-        관형격조사(Josa Kyok Genitive, JKG) 
-        목적격조사(Josa Kyok Objective, JKO) 
-        부사격조사(Josa Kyok Boosa, JKB) 
-        호격조사(Josa Kyok Vocative, JKV) 
-        인용격조사(Josa Kyok Quotation, JKQ) 
-        보조사(Josa auXiliary, JX) :
-        접속조사(Josa Connection, JC)
-
-        - 어미 계열 
-        선어말어미(Eomi Preposition, EP)
-        종결어미(Eomi Final, EF) :
-        연결어미(Eomi Connection, EC) 
-        명사형전성어미(Eomi Transitive Noun, ETN) 
-        관형형전성어미(Eomi Transitive Modifier, ETM) 
-        체언접두사(XPN) 
-        명사파생접미사(eXtended Suffix Noun, XSN) 
-        동사파생접미사(eXtended Suffix Verb, XSV)
-        형용사파생접미사(eXtended Suffix Adjective, XSA)
-        어근(eXtended Root, XR)
-
-        - Sign 계열 
-        마침표, 물음표, 느낌표(Sign Final, SF) 
-        따옴표, 괄호표, 줄표(SS) 
-        쉼표, 가운뎃점, 콜론, 빗금(SP) 
-        줄임표(Sign Ending, SE) 
-        붙임표(물결, 숨김, 빠짐)(SO) 
-        외국어(Sign Language, SL) 
-        한자(Sign Hanja, SH) 
-        숫자(Sign Number, SN) 
-        기타기호(논리수학기호, 화폐기호)(SW)
-        """
+        word_classes_str = ""
+        for t in type : 
+            word_classes_str += self.word_classes[t]
                 
         print(word_classes_str)
     
