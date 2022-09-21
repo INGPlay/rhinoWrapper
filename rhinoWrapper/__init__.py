@@ -1,3 +1,3 @@
-from .rhinoWrapper import Rhino
+from .__rhinoWrapper import Rhino
 
 __doc__ = Rhino.__doc__

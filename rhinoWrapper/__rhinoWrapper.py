@@ -19,7 +19,7 @@ class Rhino :
         else :
             self.pos = ["all"]
             
-        self.filters = filters
+        self.filters = set(filters)
         
         self.word_classes = {
             "noun" : """
@@ -88,28 +88,37 @@ class Rhino :
                        *,
                        eomi = False, combineN = False, xrVv = False) -> list :
         형태소 분석 결과를 Python의 리스트로 가지고 오되, 지정된 품사의 형태 부분만 가져온다
-            1. input: 입력문
+            1. input: 입력문 또는 문장 리스트(list), 튜플(tuple)
             2. pos: 선택할 품사. 기본값은 모든 품사
             3. filters : 불용어 목록, 입력되지 않으면 __init__()의 filters를 사용한다
             4. eomi: 어말어미 부착 여부, 기본값은 부착없이 원형 사용
             5. combineN: True시 하나의 어절 내에서 연속된 NNG, NNP를 하나의 NNG로 연결한 뒤, morphs, poses 결과를 출력
             6. xrVv: XR+하 형태를 동사로 변환할 것인지 여부
         """
-
-        if not pos :
-            pos = self.pos
-        if not filters :
-            filters = self.filters
-            
-        result = rhinoMorph.onlyMorph_list(self.rn, input, pos, eomi, combineN, xrVv)
-        
         # 불용어 처리
         def filter_stopwords(input) :
             if input in filters :
                 return False
             return True
-        if filters :
-            result = list(filter(filter_stopwords, result))
+        
+        def tokenize(input) :
+            result = rhinoMorph.onlyMorph_list(self.rn, input, pos, eomi, combineN, xrVv)
+            if filters :
+                result = list(filter(filter_stopwords, result))
+            return result
+
+        if not pos :
+            pos = set(self.pos)
+        if not filters :
+            filters = self.filters
+            
+        result = []
+        if isinstance(input, str) :
+            result = tokenize(input)
+        elif isinstance(input, list) or isinstance(input, tuple) :
+            result = list(map(tokenize, input))
+        else :
+            raise ValueError("input 파라미터에 str 혹은 list, tuple 형의 값을 넣어주세요")
         
         return result
     
@@ -123,30 +132,42 @@ class Rhino :
                          *,
                          eomi = False, combineN = False, xrVv = False) -> list :
         형태소 분석 결과를 Python의 (morph, pos) 형태의 튜플을 요소로 가지는 리스트 반환한다
-            1. input: 입력문
+            1. input: 입력문(str) 또는 문장 리스트(list), 튜플(tuple)
             2. pos: 선택할 품사. 기본값은 모든 품사
             3. filters : 불용어 목록, 입력되지 않으면 __init__()의 filters를 사용한다
             4. eomi: 어말어미 부착 여부, 기본값은 부착없이 원형 사용
             5. combineN: True시 하나의 어절 내에서 연속된 NNG, NNP를 하나의 NNG로 연결한 뒤, morphs, poses 결과를 출력
             6. xrVv: XR+하 형태를 동사로 변환할 것인지 여부
         """
-        if not pos :
-            pos = self.pos
-        if not filters :
-            filters = self.filters
-        
-        # ([형태소 목록], [품사 목록])의 형태로 반환
-        result = rhinoMorph.wholeResult_list(self.rn, input, pos, eomi, combineN, xrVv)
-        
         # 불용어 처리
         def filter_stopwords(input) :
             if input[0] in filters :
                 return False
             return True
-        if filters :
-            result = list(filter(filter_stopwords, zip(result[0], result[1])))
-        else : 
-            result = list(zip(result[0], result[1]))
+        
+        def tokenize(input) :
+            # ([형태소 목록], [품사 목록])의 형태로 반환
+            result = rhinoMorph.wholeResult_list(self.rn, input, pos, eomi, combineN, xrVv)
+            # zip() 함수로 [[(형태소, 품사), (형태소, 품사), ...], [(형태소, 품사), ...],[...], ...]로 변환
+            result = zip(result[0], result[1])
+            if filters :
+                result = list(filter(filter_stopwords, result))
+            else : 
+                result = list(result)
+            return result
+        
+        if not pos :
+            pos = (self.pos)
+        if not filters :
+            filters = self.filters
+        
+        result = []
+        if isinstance(input, str) :
+            result = tokenize(input)
+        elif isinstance(input, list) or isinstance(input, tuple) :
+            result = list(map(tokenize, input))
+        else :
+            raise ValueError("input 파라미터에 str 혹은 list, tuple 형의 값을 넣어주세요")
         
         return result
     
@@ -158,10 +179,20 @@ class Rhino :
                          *,
                          xrVv = False) -> str :
         형태소 분석 결과를 TEXT로 된 원 분석 결과 형태(str)로 가지고 온다
-            1. input: 입력문
+            1. input: 입력문(str) 또는 문장 리스트(list), 튜플(tuple)
             2. xrVv: XR+하 형태를 동사로 변환할 것인지 여부
         """
-        return rhinoMorph.wholeResult_text(self.rn, input, xrVv)
+        def tokenize(input) :
+            return rhinoMorph.wholeResult_text(self.rn, input, xrVv)
+        
+        if isinstance(input, str) :
+            result = tokenize(input)
+        elif isinstance(input, list) or isinstance(input, tuple) :
+            result = list(map(tokenize, input))
+        else :
+            raise ValueError("input 파라미터에 str 혹은 list, tuple 형의 값을 넣어주세요")
+        
+        return result
 
     def print_word_classes(self, type = ["noun", "josa", "eomi", "sign"]) -> None :  
         """
@@ -170,7 +201,6 @@ class Rhino :
         1. type : "noun", "josa", "eomi", "sign"이 요소로 쓰인 리스트
                   기본값은 ["noun", "josa", "eomi", "sign"]
         """
-        
         word_classes_str = ""
         for t in type : 
             word_classes_str += self.word_classes[t]
