@@ -19,7 +19,7 @@ class Rhino :
         else :
             self.pos = ["all"]
             
-        self.filters = set(filters)
+        self.filters = list(set(filters))
         
         self.word_classes = {
             "noun" : """
@@ -108,17 +108,15 @@ class Rhino :
             return result
 
         if not pos :
-            pos = set(self.pos)
+            pos = list(set(self.pos))
         if not filters :
             filters = self.filters
             
         result = []
         if isinstance(input, str) :
             result = tokenize(input)
-        elif isinstance(input, list) or isinstance(input, tuple) :
-            result = list(map(tokenize, input))
         else :
-            raise ValueError("input 파라미터에 str 혹은 list, tuple 형의 값을 넣어주세요")
+            result = list(map(tokenize, input))
         
         return result
     
@@ -157,17 +155,15 @@ class Rhino :
             return result
         
         if not pos :
-            pos = (self.pos)
+            pos = list(set(self.pos))
         if not filters :
             filters = self.filters
         
         result = []
         if isinstance(input, str) :
             result = tokenize(input)
-        elif isinstance(input, list) or isinstance(input, tuple) :
-            result = list(map(tokenize, input))
         else :
-            raise ValueError("input 파라미터에 str 혹은 list, tuple 형의 값을 넣어주세요")
+            result = list(map(tokenize, input))
         
         return result
     
@@ -187,10 +183,8 @@ class Rhino :
         
         if isinstance(input, str) :
             result = tokenize(input)
-        elif isinstance(input, list) or isinstance(input, tuple) :
-            result = list(map(tokenize, input))
         else :
-            raise ValueError("input 파라미터에 str 혹은 list, tuple 형의 값을 넣어주세요")
+            result = list(map(tokenize, input))
         
         return result
 
