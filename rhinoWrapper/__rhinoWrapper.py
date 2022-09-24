@@ -102,6 +102,7 @@ class Rhino :
             return True
         
         def tokenize(input) :
+            input = str(input)
             result = rhinoMorph.onlyMorph_list(self.rn, input, pos, eomi, combineN, xrVv)
             if filters :
                 result = list(filter(filter_stopwords, result))
@@ -144,6 +145,7 @@ class Rhino :
             return True
         
         def tokenize(input) :
+            input = str(input)
             # ([형태소 목록], [품사 목록])의 형태로 반환
             result = rhinoMorph.wholeResult_list(self.rn, input, pos, eomi, combineN, xrVv)
             # zip() 함수로 [[(형태소, 품사), (형태소, 품사), ...], [(형태소, 품사), ...],[...], ...]로 변환
@@ -179,6 +181,7 @@ class Rhino :
             2. xrVv: XR+하 형태를 동사로 변환할 것인지 여부
         """
         def tokenize(input) :
+            input = str(input)
             return rhinoMorph.wholeResult_text(self.rn, input, xrVv)
         
         if isinstance(input, str) :
