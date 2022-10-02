@@ -2,24 +2,60 @@ import rhinoMorph
 
 class Rhino :
     
-    def __init__(self, pos = [], filters = []) :
+    def __init__(self, pos = [], 
+                 *,
+                 exclude_pos = [], filters = []) :
         """
-    def __init__(self, pos = [], filters = []) :
-            1. pos: 선택할 품사. 기본값은 모든 품사 
+    def __init__(self, pos = [], 
+                 *,
+                 exclude_pos = [], filters = []) :
+            1. pos: 선택할 품사. 기본값은 모든 품사
+                    품사 약자가 들어간 str 혹은 list
+                        ex) "XR"
+                            ["NNP", "VV"]
                     pos가 정해지지 않은 메소드는 이 pos가 파라미터로 들어간다
                     print_word_classes() 함수로 사용가능한 품사 목록을 볼 수 있다
+            3. exclude_pos : 제외할 품사, 기본값은 빈 리스트
+                            품사 약자가 들어간 str 혹은 list
+                                ex) "XR"
+                                    ["NNP", "VV"]
+                             exclude_pos가 정해지지 않은 메소드는 이 exclude_pos가 파라미터로 들어간다
+                             print_word_classes() 함수로 사용가능한 품사 목록을 볼 수 있다
             2. filters : 불용어 목록, 기본값은 빈 값
-                        filters의 리스트에 포함된 단어나 형태소는 onlyMorph_list() 와 wholeResult_list() 함수로 반환되지 않음
+                         이 값에 포함된 값은 결과에서 제외됨.
+                         불용어가 들어간 str 혹은 list
+                             ex) "뭐"
+                                 ["이놈아", "는"]
+                         filters의 리스트에 포함된 단어나 형태소는 onlyMorph_list() 와 wholeResult_list() 함수로 반환되지 않음
         """
+        # 타입이 str 인 경우 다르게 처리
+        def handle_str(parameter) :
+            if isinstance(parameter, str) :
+                parameter = [parameter]
+            else :
+                parameter = list(set(parameter))
+            return parameter
 
         self.rn = rhinoMorph.startRhino()
         
+        # 파라미터 handling
         if pos :
-            self.pos = pos
+            self.pos = handle_str(pos)
         else :
-            self.pos = ["all"]
+            self.pos = ["NNG", "NNP", "NNB", "NP", "NR", "VV", "VA", "VX", "VCP", "VCN", "MM", "MAG", "MAJ", "IC",
+                        "JKS", "JKC", "JKG", "JKO", "JKB", "JKV", "JKQ", "JX", "JC",
+                        "EP", "EF", "EC", "ETN", "ETM", "XPN", "XSN", "XSV", "XSA", "XR",
+                        "SF", "SS", "SP", "SE", "SO", "SL", "SH", "SN", "SW"]
             
-        self.filters = list(set(filters))
+        if filters :
+            self.filters = handle_str(filters)
+        else :
+            self.filters = []
+            
+        if exclude_pos :
+            self.exclude_pos = handle_str(exclude_pos)
+        else :
+            self.exclude_pos = []
         
         self.word_classes = {
             "noun" : """
@@ -78,23 +114,45 @@ class Rhino :
             """
         }
 
-    def onlyMorph_list(self, input, 
-                       pos = [], filters = [], 
+    def onlyMorph_list(self, input, pos = [], 
                        *,
+                       exclude_pos = [], filters = [], 
                        eomi = False, combineN = False, xrVv = False) -> list :
         """
-    def onlyMorph_list(self, input, 
-                       pos = [], filters = [], 
+    def onlyMorph_list(self, input, pos = [], 
                        *,
+                       exclude_pos = [], filters = [], 
                        eomi = False, combineN = False, xrVv = False) -> list :
         형태소 분석 결과를 Python의 리스트로 가지고 오되, 지정된 품사의 형태 부분만 가져온다
             1. input: 입력문 또는 문장 리스트(list), 튜플(tuple)
             2. pos: 선택할 품사. 기본값은 모든 품사
-            3. filters : 불용어 목록, 입력되지 않으면 __init__()의 filters를 사용한다
-            4. eomi: 어말어미 부착 여부, 기본값은 부착없이 원형 사용
-            5. combineN: True시 하나의 어절 내에서 연속된 NNG, NNP를 하나의 NNG로 연결한 뒤, morphs, poses 결과를 출력
-            6. xrVv: XR+하 형태를 동사로 변환할 것인지 여부
+                    품사 약자가 들어간 str 혹은 list
+                        ex) "XR"
+                            ["NNP", "VV"]
+                    입력되지 않으면 __init__()의 pos를 사용한다
+            3. exclude_pos : 제외할 품사. 기본값은 빈 리스트
+                            품사 약자가 들어간 str 혹은 list
+                                ex) "XR"
+                                    ["NNP", "VV"]
+                             입력되지 않으면 __init__()의 exclude_pos를 사용한다
+            4. filters : 불용어 목록, 기본값은 빈 리스트
+                         이 값에 포함된 값은 결과에서 제외됨.
+                         불용어가 들어간 str 혹은 list
+                             ex) "뭐"
+                                 ["이놈아", "는"]
+                         입력되지 않으면 __init__()의 filters를 사용한다
+            5. eomi: 어말어미 부착 여부, 기본값은 부착없이 원형 사용
+            6. combineN: True시 하나의 어절 내에서 연속된 NNG, NNP를 하나의 NNG로 연결한 뒤, morphs, poses 결과를 출력
+            7. xrVv: XR+하 형태를 동사로 변환할 것인지 여부
         """
+        # 타입이 str 인 경우 다르게 처리
+        def handle_str(parameter) :
+            if isinstance(parameter, str) :
+                parameter = [parameter]
+            else :
+                parameter = list(set(parameter))
+            return parameter
+        
         # 불용어 처리
         def filter_stopwords(input) :
             if input in filters :
@@ -108,11 +166,25 @@ class Rhino :
                 result = list(filter(filter_stopwords, result))
             return result
 
-        if not pos :
-            pos = list(set(self.pos))
-        if not filters :
-            filters = self.filters
+        # 파라미터 handling
+        if pos :
+            pos = handle_str(pos)
+        else :
+            pos = self.pos
             
+        if filters :
+            filters = handle_str(filters)
+        else :
+            filters = self.filters  
+            
+        if exclude_pos :
+            exclude_pos = handle_str(exclude_pos)
+        else :
+            exclude_pos = self.exclude_pos  
+            
+        pos = list(set(pos) - set(exclude_pos))
+        
+        # 토크나이징
         result = []
         if isinstance(input, str) :
             result = tokenize(input)
@@ -121,23 +193,45 @@ class Rhino :
         
         return result
     
-    def wholeResult_list(self, input, 
-                         pos = [], filters = [],
+    def wholeResult_list(self, input, pos = [], 
                          *,
+                         exclude_pos = [], filters = [],
                          eomi = False, combineN = False, xrVv = False) -> list :
         """
-    def wholeResult_list(self, input, 
-                         pos = [], filters = [],
+    def wholeResult_list(self, input, pos = [], 
                          *,
+                         exclude_pos = [], filters = [],
                          eomi = False, combineN = False, xrVv = False) -> list :
         형태소 분석 결과를 Python의 (morph, pos) 형태의 튜플을 요소로 가지는 리스트 반환한다
-            1. input: 입력문(str) 또는 문장 리스트(list), 튜플(tuple)
+            1. input: 입력문 또는 문장 리스트(list), 튜플(tuple)
             2. pos: 선택할 품사. 기본값은 모든 품사
-            3. filters : 불용어 목록, 입력되지 않으면 __init__()의 filters를 사용한다
-            4. eomi: 어말어미 부착 여부, 기본값은 부착없이 원형 사용
-            5. combineN: True시 하나의 어절 내에서 연속된 NNG, NNP를 하나의 NNG로 연결한 뒤, morphs, poses 결과를 출력
-            6. xrVv: XR+하 형태를 동사로 변환할 것인지 여부
+                    품사 약자가 들어간 str 혹은 list
+                        ex) "XR"
+                            ["NNP", "VV"]
+                    입력되지 않으면 __init__()의 pos를 사용한다
+            3. exclude_pos : 제외할 품사. 기본값은 빈 리스트
+                            품사 약자가 들어간 str 혹은 list
+                                ex) "XR"
+                                    ["NNP", "VV"]
+                             입력되지 않으면 __init__()의 exclude_pos를 사용한다
+            4. filters : 불용어 목록, 기본값은 빈 리스트
+                         이 값에 포함된 값은 결과에서 제외됨.
+                         불용어가 들어간 str 혹은 list
+                             ex) "뭐"
+                                 ["이놈아", "는"]
+                         입력되지 않으면 __init__()의 filters를 사용한다
+            5. eomi: 어말어미 부착 여부, 기본값은 부착없이 원형 사용
+            6. combineN: True시 하나의 어절 내에서 연속된 NNG, NNP를 하나의 NNG로 연결한 뒤, morphs, poses 결과를 출력
+            7. xrVv: XR+하 형태를 동사로 변환할 것인지 여부
         """
+        # 타입이 str 인 경우 다르게 처리
+        def handle_str(parameter) :
+            if isinstance(parameter, str) :
+                parameter = [parameter]
+            else :
+                parameter = list(set(parameter))
+            return parameter
+        
         # 불용어 처리
         def filter_stopwords(input) :
             if input[0] in filters :
@@ -156,11 +250,25 @@ class Rhino :
                 result = list(result)
             return result
         
-        if not pos :
-            pos = list(set(self.pos))
-        if not filters :
-            filters = self.filters
+        # 파라미터 handling
+        if pos :
+            pos = handle_str(pos)
+        else :
+            pos = self.pos
+            
+        if filters :
+            filters = handle_str(filters)
+        else :
+            filters = self.filters  
+            
+        if exclude_pos :
+            exclude_pos = handle_str(exclude_pos)
+        else :
+            exclude_pos = self.exclude_pos  
+            
+        pos = list(set(pos) - set(exclude_pos))
         
+        # 토크나이징
         result = []
         if isinstance(input, str) :
             result = tokenize(input)
