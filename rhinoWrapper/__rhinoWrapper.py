@@ -117,12 +117,12 @@ class Rhino :
     def onlyMorph_list(self, input, pos = [], 
                        *,
                        exclude_pos = [], filters = [], 
-                       eomi = False, combineN = False, xrVv = False) -> list :
+                       eomi = True, combineN = True, xrVv = True) -> list :
         """
     def onlyMorph_list(self, input, pos = [], 
                        *,
                        exclude_pos = [], filters = [], 
-                       eomi = False, combineN = False, xrVv = False) -> list :
+                       eomi = True, combineN = True, xrVv = True) -> list :
         형태소 분석 결과를 Python의 리스트로 가지고 오되, 지정된 품사의 형태 부분만 가져온다
             1. input: 입력문 또는 문장 리스트(list), 튜플(tuple)
             2. pos: 선택할 품사. 기본값은 모든 품사
@@ -196,12 +196,12 @@ class Rhino :
     def wholeResult_list(self, input, pos = [], 
                          *,
                          exclude_pos = [], filters = [],
-                         eomi = False, combineN = False, xrVv = False) -> list :
+                         eomi = True, combineN = True, xrVv = True) -> list :
         """
     def wholeResult_list(self, input, pos = [], 
                          *,
                          exclude_pos = [], filters = [],
-                         eomi = False, combineN = False, xrVv = False) -> list :
+                         eomi = True, combineN = True, xrVv = True) -> list :
         형태소 분석 결과를 Python의 (morph, pos) 형태의 튜플을 요소로 가지는 리스트 반환한다
             1. input: 입력문 또는 문장 리스트(list), 튜플(tuple)
             2. pos: 선택할 품사. 기본값은 모든 품사
